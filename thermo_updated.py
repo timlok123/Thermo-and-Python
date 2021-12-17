@@ -21,6 +21,7 @@ class Particle():
 
 class sim():
 
+    # The boundaries of the box should be much bigger than the particles(at least 100 times)
     X = 1
     Y = 1
 
@@ -34,7 +35,7 @@ class sim():
     def collision_dection(self):
         
         ##detect if the particles collide with the wall 
-        ignore_list = []
+        ignore_list = [] ##adding ignore_list to ensure we haven't double counted the colliding particles
         for particle in self.particles:
             
             x,y = particle.position
@@ -47,7 +48,8 @@ class sim():
             v1 = particle.velocity
             m1 = particle.mass
             p1 = particle.position
-
+  
+            ## Make use of ignore list   
             if (particle in ignore_list):
                 continue
 
@@ -62,6 +64,7 @@ class sim():
                     continue
 
                 elif np.dot(p1-p2,p1-p2) <= (particle.radius+particle2.radius)**2:
+                    # Formula from Wikipeida 
                     particle.velocity = v1 - 2*m1/(m1+m2)* np.dot(v1-v2,p1-p2)/np.dot(p1-p2,p1-p2)*(p1-p2)
                     particle2.velocity = v2 - 2*m2/(m1+m2)* np.dot(v2-v1,p2-p1)/np.dot(p2-p1,p2-p1)*(p2-p1)
                     ignore_list.append(particle2)
@@ -69,6 +72,7 @@ class sim():
 
     def increment(self):
         self.collision_dection()
+        # To simulate that the particles is moving 
         for i in self.particles:
             i.position += i.velocity*self.dt
 
@@ -106,8 +110,16 @@ def update(frame):
     scatter.set_offsets(np.array(sim.particle_position()))
     scatter.set_color(np.array(sim.particle_colour()))
     return scatter, 
+                
+ani = FuncAnimation(fig, update, frames=range(500),init_func = init, blit = False, interval = 100, repeat = False)
+#
+#
 
-ani = FuncAnimation(fig, update, frames=range(1200), init_func = init, blit = True, interval = 1/30, repeat = False)
+#frames = how many frames do you want to use 
+#init_func = the first frame you wanna display (optional)
+#blit = True -> only draw the changing data again -> display each frame faster 
+#interval = how long will one frame last (in milliseconds)
+#repeat = False -> don't repeat after all the frames has been played 
  
 plt.show()
 
