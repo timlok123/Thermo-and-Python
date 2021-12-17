@@ -25,7 +25,7 @@ class sim():
     X = 1
     Y = 1
 
-    def __init__(self, dt = 1E-5, Num = 10):
+    def __init__(self, dt = 1E-5, Num = 500):
         self.dt = dt
         self.Num = Num
         ##
@@ -85,7 +85,7 @@ class sim():
 
 sim = sim()
 
-decided_v = 1000
+decided_v = 10000
 ## Set the position and velocity of the particles 
 for particle in sim.particles:
     particle.position = np.random.uniform([-sim.X/2,-sim.Y/2], [sim.X/2,sim.Y/2], size =2) 
@@ -111,7 +111,7 @@ def update(frame):
     scatter.set_color(np.array(sim.particle_colour()))
     return scatter, 
                 
-ani = FuncAnimation(fig, update, frames=range(500),init_func = init, blit = False, interval = 100, repeat = False)
+ani = FuncAnimation(fig, update, frames=range(500),init_func = init, blit = True, interval = 100, repeat = False)
 #
 #
 
