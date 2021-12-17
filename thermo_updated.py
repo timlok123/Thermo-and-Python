@@ -21,8 +21,8 @@ class Particle():
 
 class sim():
 
-    X = 2
-    Y = 2
+    X = 1
+    Y = 1
 
     def __init__(self, dt = 1E-5, Num = 10):
         self.dt = dt
@@ -34,7 +34,9 @@ class sim():
     def collision_dection(self):
         
         ##detect if the particles collide with the wall 
+        ignore_list = []
         for particle in self.particles:
+            
             x,y = particle.position
             if(self.X/2< x+particle.radius) or (-self.X/2> x-particle.radius):
                 particle.velocity[0] *=-1
@@ -42,16 +44,27 @@ class sim():
                 particle.velocity[1] *=-1
 
             id1 = particle.id
+            v1 = particle.velocity
+            m1 = particle.mass
+            p1 = particle.position
+
+            if (particle in ignore_list):
+                continue
 
         ## Check if the particles collide with other particle 
             for particle2 in self.particles:
+
+                v2 = particle2.velocity
+                m2 = particle2.mass
+                p2 = particle2.position
+
                 if(id1 == particle2.id):
                     continue
 
-                else:
-                    
-
-                
+                elif np.dot(p1-p2,p1-p2) <= (particle.radius+particle2.radius)**2:
+                    particle.velocity = v1 - 2*m1/(m1+m2)* np.dot(v1-v2,p1-p2)/np.dot(p1-p2,p1-p2)*(p1-p2)
+                    particle2.velocity = v2 - 2*m2/(m1+m2)* np.dot(v2-v1,p2-p1)/np.dot(p2-p1,p2-p1)*(p2-p1)
+                    ignore_list.append(particle2)
 
 
     def increment(self):
@@ -72,9 +85,11 @@ decided_v = 1000
 ## Set the position and velocity of the particles 
 for particle in sim.particles:
     particle.position = np.random.uniform([-sim.X/2,-sim.Y/2], [sim.X/2,sim.Y/2], size =2) 
-    particle.velocity = np.random.uniform([-decided_v,-decided_v], [decided_v,decided_v],size2) 
+    particle.velocity = np.random.uniform([-decided_v,-decided_v], [decided_v,decided_v],size=2) 
 ##
 
+## Set id 0 particles to be blue
+sim.particles[0].colour = "red"
 
 ## plot code 
 fig, ax = plt.subplots()
@@ -89,6 +104,7 @@ def init():
 def update(frame):
     sim.increment()
     scatter.set_offsets(np.array(sim.particle_position()))
+    scatter.set_color(np.array(sim.particle_colour()))
     return scatter, 
 
 ani = FuncAnimation(fig, update, frames=range(1200), init_func = init, blit = True, interval = 1/30, repeat = False)
