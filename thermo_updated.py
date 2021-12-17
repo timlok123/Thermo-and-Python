@@ -1,6 +1,10 @@
 ## This is the most updated version of the code 
 ## updated at 17/12 17:35
 
+## some features to implemented afterwards
+## 1. intermolecular force 
+## 2. when the particle collide, changes their colour
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -85,7 +89,6 @@ class sim():
 
 sim = sim()
 
-decided_v = 10000
 ## Set the position and velocity of the particles 
 for particle in sim.particles:
     particle.position = np.random.uniform([-sim.X/2,-sim.Y/2], [sim.X/2,sim.Y/2], size =2) 
@@ -99,21 +102,23 @@ sim.particles[0].colour = "red"
 fig, ax = plt.subplots()
 
 scatter = ax.scatter([],[])
+## The first list is for setting x-values
+## The second list is for setting x-values
 
 def init():
-    ax.set_xlim(-sim.X/2, sim.X/2)
-    ax.set_ylim(-sim.Y/2, sim.Y/2)
+    ax.set_xlim(-sim.X/2, sim.X/2) # set the range for x axis 
+    ax.set_ylim(-sim.Y/2, sim.Y/2) # set the range for y axis
     return scatter, 
 
 def update(frame):
     sim.increment()
-    scatter.set_offsets(np.array(sim.particle_position()))
-    scatter.set_color(np.array(sim.particle_colour()))
+    scatter.set_offsets(np.array(sim.particle_position())) ##update the data (position of particles) to the plane
+    scatter.set_color(np.array(sim.particle_colour())) ##update the data (colour of particles) to the plane
     return scatter, 
                 
 ani = FuncAnimation(fig, update, frames=range(500),init_func = init, blit = True, interval = 100, repeat = False)
-#
-#
+#fig -> place to display the animation
+#update = func to call each time to update the animation
 
 #frames = how many frames do you want to use 
 #init_func = the first frame you wanna display (optional)
