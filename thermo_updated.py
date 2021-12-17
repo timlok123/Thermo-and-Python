@@ -40,7 +40,44 @@ class sim():
             i += i.position + i.velocity*self.dt
 
     def particle_position(self):
-        return [ i for i in self.particles]
+        return [ i.position for i in self.particles]
+
+    def particle_colour(self):
+        return [ i.colour for i in self.particles]
+
+
+sim = sim()
+
+decided_v = 1000
+
+## Set the position and velocity of the particles 
+for particle in sim.particle:
+    particle.position = np.random.uniform([-sim.X/2,-sim.Y/2], [sim.X/2,sim.Y/2], size =2) 
+    particle.velocity = np.random.uniform([-decided_v,-decided_v], [decided_v,decided_v], size =2)
+##
+
+    
+
+## plot code 
+
+fig, ax = plt.subplots()
+
+scatter = ax.scatter([],[])
+
+def init():
+    ax.set_xlim(-sim.X/2, sim.X/2)
+    ax.set_ylim(-sim.Y/2, sim.Y/2)
+    return scatter, 
+
+def update(frame):
+    sim.increment()
+    scatter.set_offsets(np.array(sim.particle_positions()))
+    return scatter, 
+
+ani = FuncAnimation(fig, update, frame=range(1200), init_func = init, blit = True, interval = 1/30, repeat = True)
+
+plt.show()
+
 
 
 
