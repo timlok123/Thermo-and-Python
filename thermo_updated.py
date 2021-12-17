@@ -111,12 +111,3 @@ ani = FuncAnimation(fig, update, frames=range(1200), init_func = init, blit = Tr
  
 plt.show()
 
-
-
-
-
-
-
-
-
-    
