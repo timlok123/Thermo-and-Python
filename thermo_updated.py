@@ -1,5 +1,6 @@
 ## This is the most updated version of the code 
-## updated at 17/12 17:35
+## updated at 20/12 
+## Tut 3 19:52
 
 ## some features to implemented afterwards
 ## 1. intermolecular force 
@@ -29,7 +30,7 @@ class sim():
     X = 1
     Y = 1
 
-    def __init__(self, dt = 1E-5, Num = 500):
+    def __init__(self, dt = 1E-5, Num = 10):
         self.dt = dt
         self.Num = Num
         ##
@@ -86,37 +87,70 @@ class sim():
     def particle_colour(self):
         return [i.colour for i in self.particles]
 
+    def particle_speed(self):
+        return [np.sqrt(np.dot(i.velocity,i.velocity)) for i in self.particles]
 
-sim = sim()
+#set sim variables 
+Np = 100
+sim = sim(Num = Np,dt = 1E-2)
+
+decided_v = 1
 
 ## Set the position and velocity of the particles 
 for particle in sim.particles:
-    particle.position = np.random.uniform([-sim.X/2,-sim.Y/2], [sim.X/2,sim.Y/2], size =2) 
-    particle.velocity = np.random.uniform([-decided_v,-decided_v], [decided_v,decided_v],size=2) 
+    particle.position = np.random.uniform([-sim.X/2+0.01,-sim.Y/2+0.01], [sim.X/2-0.01,sim.Y/2-0.01], size =2) 
+    particle.velocity = np.array([1,1]) 
 ##
 
 ## Set id 0 particles to be blue
 sim.particles[0].colour = "red"
 
 ## plot code 
-fig, ax = plt.subplots()
+fig, (ax,ax2) = plt.subplots(figsize=(5,9), nrows = 2)
+
+
+ax.set_aspect("equal")
+vs = np.linspace(0,2,Np)
+n_avg = 50
+freqs_matrix = np.tile((np.histogram(sim.particle_speed(), bins = vs))[0].astype(np.float),(n_avg,1))
 
 scatter = ax.scatter([],[])
 ## The first list is for setting x-values
 ## The second list is for setting x-values
 
+##Create bar chart 
+bar = ax2.bar(vs,[0]*len(vs),width=0.9*np.gradient(vs), align="edge", alpha = 0.8)
+
+
 def init():
-    ax.set_xlim(-sim.X/2, sim.X/2) # set the range for x axis 
-    ax.set_ylim(-sim.Y/2, sim.Y/2) # set the range for y axis
-    return scatter, 
+    ax.set_xlim(-sim.X/2, sim.X/2) # set the range for x axis animation
+    ax.set_ylim(-sim.Y/2, sim.Y/2) # set the range for y axis animation
+
+    ax2.set_xlim(vs[0],vs[-1]) # set the range for x axis bar-chart
+    ax2.set_ylim(0,Np) # set the range for y axis bar-chart
+    ax2.set(xlabel = "Particle speed", ylabel="Number of particles")
+    return (scatter, *bar.patches)
 
 def update(frame):
     sim.increment()
+
+    freqs, bins = np.histogram(sim.particle_speed(), bins = vs)
+    freqs_matrix[frame%n_avg] = freqs
+    freqs_mean = np.mean(freqs_matrix,axis=0) 
+    freqs_max = np.max(freqs_matrix) 
+
+    for rect, height in zip(bar.patches, freqs_mean):
+        rect.set_height(height)
+    
+    if np.abs(freqs_max - ax2.get_ylim()[1])>5:
+        ax2.set_ylim(0,ax2.get_ylim()[1]+(freqs_max - ax2.get_ylim()[1]))
+        fig.canvas.draw()
+
     scatter.set_offsets(np.array(sim.particle_position())) ##update the data (position of particles) to the plane
     scatter.set_color(np.array(sim.particle_colour())) ##update the data (colour of particles) to the plane
-    return scatter, 
+    return (scatter, *bar.patches)
                 
-ani = FuncAnimation(fig, update, frames=range(500),init_func = init, blit = True, interval = 100, repeat = False)
+ani = FuncAnimation(fig, update, frames=range(1200),init_func = init, blit = True, interval = 100, repeat = False)
 #fig -> place to display the animation
 #update = func to call each time to update the animation
 
