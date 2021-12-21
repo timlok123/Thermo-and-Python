@@ -3,8 +3,10 @@
 ## Tut 3 19:52
 
 ## some features to implemented afterwards
+## 0. fix the temperature bug first
 ## 1. intermolecular force 
 ## 2. when the particle collide, changes their colour
+## 3. modify the x-axis of histogram
 
 import numpy as np
 import matplotlib
@@ -14,9 +16,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 ##
 
+mass_of_O_mole = 5.31*10**(-23)
 class Particle():
     
-    def __init__(self, id=0, position = np.zeros(2),velocity = np.zeros(2), radius = 1E-2 , mass =1, colour = "blue"):
+    def __init__(self, id=0, position = np.zeros(2),velocity = np.zeros(2), radius = 1E-2 , mass=mass_of_O_mole, colour = "blue"):
         self.id = id
         self.position = position
         self.velocity = velocity
@@ -90,8 +93,16 @@ class sim():
     def particle_speed(self):
         return [np.sqrt(np.dot(i.velocity,i.velocity)) for i in self.particles]
 
+    def temperature(self):
+        Total_KE = 0 
+        K_B = 1.380649*10**(-23)
+        for i in self.particles:
+            Total_KE += 0.5*i.mass*np.dot(i.velocity,i.velocity)**2
+        return (Total_KE/self.Num)*(2/3)/(K_B)
+
 #set sim variables 
 Np = 100
+
 sim = sim(Num = Np,dt = 1E-2)
 
 decided_v = 1
@@ -112,15 +123,14 @@ fig, (ax,ax2) = plt.subplots(figsize=(5,9), nrows = 2)
 ax.set_aspect("equal")
 vs = np.linspace(0,2,Np)
 n_avg = 50
-freqs_matrix = np.tile((np.histogram(sim.particle_speed(), bins = vs))[0].astype(np.float),(n_avg,1))
+freqs_matrix = np.tile((np.histogram(sim.particle_speed(), bins = vs))[0].astype(np.float64),(n_avg,1))
 
 scatter = ax.scatter([],[])
 ## The first list is for setting x-values
-## The second list is for setting x-values
+## The second list is for setting y-values
 
 ##Create bar chart 
 bar = ax2.bar(vs,[0]*len(vs),width=0.9*np.gradient(vs), align="edge", alpha = 0.8)
-
 
 def init():
     ax.set_xlim(-sim.X/2, sim.X/2) # set the range for x axis animation
@@ -130,6 +140,7 @@ def init():
     ax2.set_ylim(0,Np) # set the range for y axis bar-chart
     ax2.set(xlabel = "Particle speed", ylabel="Number of particles")
     return (scatter, *bar.patches)
+
 
 def update(frame):
     sim.increment()
@@ -141,14 +152,23 @@ def update(frame):
 
     for rect, height in zip(bar.patches, freqs_mean):
         rect.set_height(height)
+
+    ## Create temperature mark
+    ##T_txt = ax2.text(1,90,s="") # set the x-y position of the temperature show
+    ##T_txt.set_text(f"{sim.temperature():.2f} K")
     
     if np.abs(freqs_max - ax2.get_ylim()[1])>5:
+        ##T_txt.set_text(f"{sim.temperature():.2f} K")
+        ##T_txt = ax2.text(1,freqs_max+1,s="")
         ax2.set_ylim(0,ax2.get_ylim()[1]+(freqs_max - ax2.get_ylim()[1]))
         fig.canvas.draw()
 
     scatter.set_offsets(np.array(sim.particle_position())) ##update the data (position of particles) to the plane
     scatter.set_color(np.array(sim.particle_colour())) ##update the data (colour of particles) to the plane
-    return (scatter, *bar.patches)
+
+    
+
+    return (scatter,*bar.patches,T_txt)
                 
 ani = FuncAnimation(fig, update, frames=range(1200),init_func = init, blit = True, interval = 100, repeat = False)
 #fig -> place to display the animation
@@ -161,4 +181,4 @@ ani = FuncAnimation(fig, update, frames=range(1200),init_func = init, blit = Tru
 #repeat = False -> don't repeat after all the frames has been played 
  
 plt.show()
-
+print(sim.temperature())
