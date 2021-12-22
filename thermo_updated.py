@@ -109,7 +109,7 @@ class sim():
 #set sim variables 
 Np = 100
 
-sim = sim(Num = Np,dt = 1E-2)
+sim = sim(Num = Np,dt = 1E-4)
 ## Set the position,velocity and mass of the particles 
 for particle in sim.particles:
     particle.position = np.random.uniform([-sim.X/2+0.01,-sim.Y/2+0.01], [sim.X/2-0.01,sim.Y/2-0.01], size =2) 
