@@ -109,11 +109,12 @@ class sim():
 #set sim variables 
 Np = 100
 
+velocity = np.sqrt(700**2/2)
 sim = sim(Num = Np,dt = 1E-4)
 ## Set the position,velocity and mass of the particles 
 for particle in sim.particles:
     particle.position = np.random.uniform([-sim.X/2+0.01,-sim.Y/2+0.01], [sim.X/2-0.01,sim.Y/2-0.01], size =2) 
-    particle.velocity = np.array([velocity_of_O_mole,velocity_of_O_mole]) 
+    particle.velocity = np.array([velocity,velocity]) 
     particle.mass = mass_of_O_mole
 ##
 
@@ -125,7 +126,7 @@ fig, (ax,ax2) = plt.subplots(figsize=(5,9), nrows = 2)
 
 
 ax.set_aspect("equal")
-vs = np.linspace(0,1000,10)
+vs = np.linspace(0,1000,25)
 n_avg = 50
 freqs_matrix = np.tile((np.histogram(sim.particle_speed(), bins = vs))[0].astype(np.float64),(n_avg,1))
 
@@ -169,7 +170,7 @@ def update(frame):
         rect.set_height(height)
 
     ## Create temperature mark
-    T_txt = ax.text(sim.X/4,ax.get_ylim()[1]*0.8,s="") # set the x-y position of the temperature show
+    T_txt = ax.text(sim.X/3.5,ax.get_ylim()[1]*0.8,s="") # set the x-y position of the temperature show
     T_txt.set_text(f"{sim.temperature():.2f} K")
     
     if np.abs(freqs_max - ax2.get_ylim()[1])>5:
