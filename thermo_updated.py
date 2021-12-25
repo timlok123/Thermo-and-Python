@@ -123,19 +123,39 @@ sim.particles[0].colour = "red"
 
 ## plot code 
 fig, (ax,ax2) = plt.subplots(figsize=(5,9), nrows = 2)
+## fig => big window
+## ax, ax2 => 2 subplot window 
+## figsize -> the size of the whole window
+## Number of rows of graph 
 
 
-ax.set_aspect("equal")
+ax.set_aspect("auto") 
+# To tell how the graph is position 
+#equal -> same scaling 
+#auto -> fill all the space with rectangle frame 
+
+
 vs = np.linspace(0,1000,25)
+# np.linspace(start,stop,cut how many piece)
+
 n_avg = 50
 freqs_matrix = np.tile((np.histogram(sim.particle_speed(), bins = vs))[0].astype(np.float64),(n_avg,1))
+## np.tile(array-like a , repeat how many times (n))
+## take out the elements in array-like a, repeat n times -> another array
+## can be used to generate zero matrix (even though numpy.zeros would be faster)
+## see the exercise in readme file to visualize what is tile looks like 
+
+## np.historgram
+## see the readme file 
 
 scatter = ax.scatter([],[])
 ## The first list is for setting x-values
 ## The second list is for setting y-values
+## The first elements in x-list and the first elements in y-list is the first xy coordinates 
+## so and so on 
 
 ##Create bar chart 
-bar = ax2.bar(vs,[0]*len(vs),width=0.9*np.gradient(vs), align="edge", alpha = 0.8)
+bar = ax2.bar(vs,[0]*len(vs), width=0.9*np.gradient(vs), align="edge", alpha = 0.8)
 
 ##Create the theoretical prediction
 dv = 100
@@ -157,16 +177,23 @@ def init():
     ax2.set(xlabel = "Particle speed", ylabel="Number of particles")
     return (scatter, *bar.patches)
 
-
+#frame is from 0 to the number set in frames=range(n) in FuncAnimation
 def update(frame):
     sim.increment()
 
-    freqs, bins = np.histogram(sim.particle_speed(), bins = vs)
-    freqs_matrix[frame%n_avg] = freqs
-    freqs_mean = np.mean(freqs_matrix,axis=0) 
-    freqs_max = np.max(freqs_matrix) 
+    
+    ## For the update of ax1 -----------------------------------------------------------------------------------------#
+    scatter.set_offsets(np.array(sim.particle_position()))    ##update the data (position of particles) to the plane
+    scatter.set_color(np.array(sim.particle_colour()))        ##update the data (colour of particles) to the plane
 
-    for rect, height in zip(bar.patches, freqs_mean):
+
+    ## For the update of ax2 -----------------------------------------------------------------------------------------#
+    freqs, bins = np.histogram(sim.particle_speed(), bins = vs)  # as the np.histogram is a tuple (array(histogram value), array(the bins)) 
+    freqs_matrix[frame%n_avg] = freqs                            # store 50th frames velocity of particles in an array
+    freqs_mean = np.mean(freqs_matrix,axis=0)                    # take the mean of each particles' velocity in past 50 frames -> an array which contain mean in the corresponding position 
+    freqs_max = np.max(freqs_matrix)                             # return the largest value in the nested array
+
+    for rect, height in zip(bar.patches, freqs_mean):            # Use a for-loop to set the values in a list to be the height of the bar chart 
         rect.set_height(height)
 
     ## Create temperature mark
@@ -175,11 +202,7 @@ def update(frame):
     
     if np.abs(freqs_max - ax2.get_ylim()[1])>5:
         ax2.set_ylim(0,freqs_max)
-        fig.canvas.draw()
-
-    scatter.set_offsets(np.array(sim.particle_position())) ##update the data (position of particles) to the plane
-    scatter.set_color(np.array(sim.particle_colour())) ##update the data (colour of particles) to the plane
-
+        fig.canvas.draw()                               # Generate the the new boundaries again
 
     return (scatter,*bar.patches,T_txt)
                 
