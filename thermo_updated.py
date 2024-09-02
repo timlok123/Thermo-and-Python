@@ -1,10 +1,3 @@
-## This is the most updated version of the code 
-
-## some features to implemented afterwards
-## 1. intermolecular force 
-## 2. when the particle collide, changes their colour
-## 3. modify the x-axis of histogram
-
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
